@@ -5,7 +5,8 @@
   "scripts": {
     "prestart": "npm install",
     "start": "ts-node index.ts",
-    "test": "tslint -t stylish --project ."
+    "test": "tslint -t stylish --project .",
+    "postversion": "git push --follow-tags"
   },
   "author": "Emiliano Heyns",
   "license": "ISC",

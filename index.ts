@@ -5,7 +5,7 @@ import * as path from 'path'
 
 import * as nunjucks from 'nunjucks'
 nunjucks.configure({ autoescape: true })
-const package = require('./package.json')
+const pkg = require('./package.json')
 
 function main(asyncMain) {
   asyncMain()
@@ -41,7 +41,7 @@ main(async () => {
   if (!config.template) config.template = 'template.html'
   if (!config.output) config.output = 'output'
 
-  console.log(package.version, config)
+  console.log(pkg.version, config)
 
   if (!config.template.endsWith('.html')) throw new Error(`Invalid template ${JSON.stringify(process.argv[3])}`)
   if (!config.collection || !config.collection.startsWith('http://') || !config.collection.endsWith('.csljson')) throw new Error(`invalid collection URL ${JSON.stringify(config.collection)}`)

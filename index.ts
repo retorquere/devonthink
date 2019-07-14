@@ -21,9 +21,15 @@ const collapse = new class {
   creators(creators) {
     return creators.map(author => author.literal || [ author.given, author.family ].filter(name => name).join(' ')).join(', ')
   }
+  author(author) {
+    return this.creators(author)
+  }
 
   date(date) {
     return date['date-parts'][0].map(dp => `${dp}`).join('-')
+  }
+  issued(issued) {
+    return this.date(issued)
   }
 }
 
@@ -43,9 +49,6 @@ main(async () => {
   const items = await request({ uri: config.collection, json: true })
 
   for (const item of items) {
-    if (item.author) item.author = collapse.creators(item.author)
-    if (item.issued) item.issued = collapse.date(item.issued)
-
     for (const [k, v] of Object.entries(item)) {
       if (!k.match(/^[a-z]+$/)) {
         const _k = k.replace(/-(.)/g, (match, c) => c.toUpperCase())
@@ -55,7 +58,9 @@ main(async () => {
     }
 
     for (const [k, v] of Object.entries(item)) {
-      if (typeof v !== 'string') console.log(k, v)
+      if (collapse[k]) item[k] = collapse[k](v)
+
+      if (typeof item[k] !== 'string') console.log(k, v)
     }
 
     fs.writeFileSync(path.join(config.output, md5(JSON.stringify(item)) + '.html'), nunjucks.renderString(template, item))

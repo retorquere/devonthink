@@ -51,7 +51,7 @@ main(async () => {
 
   for (const item of items) {
     for (const [k, v] of Object.entries(item)) {
-      if (!k.match(/^[a-z]+$/)) {
+      if (!k.match(/^[a-z]+$/i)) {
         const _k = k.replace(/-(.)/g, (match, c) => c.toUpperCase())
         item[_k] = v
         delete item[k]

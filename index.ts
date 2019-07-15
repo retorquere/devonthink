@@ -44,7 +44,7 @@ main(async () => {
   console.log(pkg.version, config)
 
   if (!config.template.endsWith('.html')) throw new Error(`Invalid template ${JSON.stringify(process.argv[3])}`)
-  if (!config.collection || !config.collection.startsWith('http://') || !config.collection.endsWith('.csljson')) throw new Error(`invalid collection URL ${JSON.stringify(config.collection)}`)
+  if (!config.collection || !config.collection.startsWith('http://') || !config.collection.match(/\.(csljson|bc03b4fe-436d-4a1f-ba59-de4d2d7a63f7)$/)) throw new Error(`invalid collection URL ${JSON.stringify(config.collection)}`)
   
   const template = fs.readFileSync(config.template, 'utf-8')
   const items = await request({ uri: config.collection, json: true })
@@ -64,6 +64,6 @@ main(async () => {
       if (typeof item[k] !== 'string') console.log(k, v)
     }
 
-    fs.writeFileSync(path.join(config.output, slug(item.title || '' ) + '.html'), nunjucks.renderString(template, item))
+    fs.writeFileSync(path.join(config.output, slug(item.title || '' , ' ') + '.html'), nunjucks.renderString(template, item))
   }
 })

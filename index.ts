@@ -1,7 +1,7 @@
 import request = require('request-promise')
-import md5 = require('md5')
 import * as fs from 'fs'
 import * as path from 'path'
+import slug = require('slug')
 
 import * as nunjucks from 'nunjucks'
 nunjucks.configure({ autoescape: true })
@@ -64,6 +64,6 @@ main(async () => {
       if (typeof item[k] !== 'string') console.log(k, v)
     }
 
-    fs.writeFileSync(path.join(config.output, md5(JSON.stringify(item)) + '.html'), nunjucks.renderString(template, item))
+    fs.writeFileSync(path.join(config.output, slug(item.title || '' ) + '.html'), nunjucks.renderString(template, item))
   }
 })

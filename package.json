@@ -12,10 +12,10 @@
   "license": "ISC",
   "dependencies": {
     "@types/node": "^12.6.2",
-    "md5": "^2.2.1",
     "nunjucks": "^3.2.0",
     "request": "^2.88.0",
     "request-promise": "^4.2.4",
+    "slug": "^1.1.0",
     "ts-node": "^8.3.0",
     "typescript": "^3.5.3"
   },

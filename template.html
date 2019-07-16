@@ -34,7 +34,7 @@
         {% elif DOI %}
           <tr><td><a href="https://doi.org/{{DOI}}">{{DOI}}</a></td></tr>
         {% elif links[0] %}
-          <tr><td><a href="{{attachment_url}}">{{links[0]}}</a></td></tr>
+          <tr><td><a href="{{links[0].url}}">{{links[0].title}}</a></td></tr>
         {% endif %}
         <tr>
           <td>{{notes | safe}}</td>

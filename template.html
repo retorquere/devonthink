@@ -8,13 +8,16 @@
     <table style="width: 100%" border="1">
       <tbody>
         <tr>
-          <td colspan="2">{{creators}}</td>
+          <td>{{creators}}</td>
         </tr>
         <tr>
-          <td colspan="2"><a href="{{url}}">{{title}}</a></td>
+          <td><a href="{{url}}">{{title}}</a></td>
         </tr>
         <tr>
-          <td colspan="2">{{journal}}</td>
+          <td>{{journal}}</td>
+        </tr>
+        <tr>
+          <td>{{notes | safe}}</td>
         </tr>
       </tbody>
     </table>

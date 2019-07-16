@@ -31,6 +31,10 @@ const collapse = new class {
   public notes(notes) {
     return notes.map(note => `<div>${note}</div>`).join('\n\n')
   }
+
+  public attachments(attachments) {
+    return attachments.map(att => att.title).join(', ')
+  }
 }
 
 interface ICollection {

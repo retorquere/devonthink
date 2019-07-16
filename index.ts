@@ -120,6 +120,10 @@ main(async () => {
   for (const item of library.items) {
     delete item.relations
     if (item.DOI && item.DOI.startsWith(DOIprefix)) item.DOI = item.DOI.substr(DOIprefix.length)
+    if (item.attachments) {
+      const attachment_url = item.attachments.find(att => att.url)
+      if (attachment_url) item.attachment_url = attachment_url.url
+    }
 
     for (const [k, v] of Object.entries(item)) {
       if (Array.isArray(v) && !v.length) {

@@ -119,10 +119,17 @@ main(async () => {
   const DOIprefix = 'https://doi.org/'
   for (const item of library.items) {
     delete item.relations
+
     if (item.DOI && item.DOI.startsWith(DOIprefix)) item.DOI = item.DOI.substr(DOIprefix.length)
+
     if (item.attachments) {
       const attachment_url = item.attachments.find(att => att.url)
       if (attachment_url) item.attachment_url = attachment_url.url
+    }
+
+    if (item.uri) {
+      const [ , lib, key ] = item.uri.match(/^http:\/\/zotero\.org\/(?:users|groups)\/((?:local\/)?[^\/]+)\/items\/(.+)/)
+      item.select = `zotero://select/items/${lib}_${key}`
     }
 
     for (const [k, v] of Object.entries(item)) {

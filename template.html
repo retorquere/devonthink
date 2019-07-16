@@ -22,6 +22,7 @@
             <a href="{% if url %}{{url}}{% elif DOI %}https://doi.org/{{DOI}}{% endif %}">{% if url %}{{url}}{% elif DOI %}{{DOI}}{% endif %}</a></td></tr>
           </td>
         </tr>
+        <tr><td><a href="{{select}}">{{select}}</a></td></tr>
         <!-- Other way DOI/url -->
         {% if url %}
           <tr><td><a href="{{url}}">{{url}}</a></td></tr>

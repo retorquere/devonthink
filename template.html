@@ -16,10 +16,10 @@
         <tr>
           <td>{{journal}}</td>
         </tr>
-        {% if DOI %}
-          <tr><td><a href="https://doi.org/{{DOI}}">{{DOI}}</a></td></tr>
-        {% elif url %}
+        {% if url %}
           <tr><td><a href="{{url}}">{{url}}</a></td></tr>
+        {% elif DOI %}
+          <tr><td><a href="https://doi.org/{{DOI}}">{{DOI}}</a></td></tr>
         {% endif %}
         <tr>
           <td>{{notes | safe}}</td>

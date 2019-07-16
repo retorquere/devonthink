@@ -28,7 +28,7 @@ const collapse = new class {
   }
 
   public tags(tags) {
-    return tags.map(tag => tag.tag).sort().join(', ')
+    return tags.sort().join(', ')
   }
 
   public notes(notes) {

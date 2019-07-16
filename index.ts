@@ -35,9 +35,11 @@ const collapse = new class {
     return notes.map(note => `<div>${note}</div>`).join('\n\n')
   }
 
+  /*
   public attachments(attachments) {
     return attachments.map(att => att.title).join(', ')
   }
+  */
 }
 
 interface ICollection {
@@ -122,10 +124,8 @@ main(async () => {
 
     if (item.DOI && item.DOI.startsWith(DOIprefix)) item.DOI = item.DOI.substr(DOIprefix.length)
 
-    if (item.attachments) {
-      const attachment_url = item.attachments.find(att => att.url)
-      if (attachment_url) item.attachment_url = attachment_url.url
-    }
+    item.links = (item.attachments || []).filter(link => link.linkMode === 'linked_url' && link.url)
+    item.attachments = (item.attachments || []).filter(link => link.linkMode !== 'linked_url')
 
     if (item.uri) {
       const [ , lib, key ] = item.uri.match(/^http:\/\/zotero\.org\/(?:users|groups)\/((?:local\/)?[^\/]+)\/items\/(.+)/)
@@ -140,7 +140,7 @@ main(async () => {
 
       if (collapse[k]) item[k] = collapse[k](v)
 
-      if (typeof item[k] !== 'string' && typeof item[k] !== 'number') console.log(k, v)
+      if (k !== 'attachments' && k !== 'links' && typeof item[k] !== 'string' && typeof item[k] !== 'number') console.log(k, v)
     }
 
     item.html = nunjucks.renderString(template, item)

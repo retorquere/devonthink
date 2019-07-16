@@ -33,8 +33,8 @@
           <tr><td><a href="{{url}}">{{url}}</a></td></tr>
         {% elif DOI %}
           <tr><td><a href="https://doi.org/{{DOI}}">{{DOI}}</a></td></tr>
-        {% elif attachment_url %}
-          <tr><td><a href="{{attachment_url}}">{{attachment_url}}</a></td></tr>
+        {% elif links[0] %}
+          <tr><td><a href="{{attachment_url}}">{{links[0]}}</a></td></tr>
         {% endif %}
         <tr>
           <td>{{notes | safe}}</td>

@@ -16,6 +16,18 @@
         <tr>
           <td>{{journal}}</td>
         </tr>
+        <!-- One way DOI/URL -->
+        <tr>
+          <td>
+            <a href="{% if url %}{{url}}{% elif DOI %}https://doi.org/{{DOI}}{% endif %}">{% if url %}{{url}}{% elif DOI %}{{DOI}}{% endif %}</a></td></tr>
+          </td>
+        </tr>
+        <!-- Other way DOI/url -->
+        {% if url %}
+          <tr><td><a href="{{url}}">{{url}}</a></td></tr>
+        {% elif DOI %}
+          <tr><td><a href="https://doi.org/{{DOI}}">{{DOI}}</a></td></tr>
+        {% endif %}
         {% if url %}
           <tr><td><a href="{{url}}">{{url}}</a></td></tr>
         {% elif DOI %}

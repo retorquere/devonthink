@@ -49,28 +49,42 @@ interface ILibrary {
 
 main(async () => {
   const config = process.argv[2]
-    ? (process[2].argv.endsWidth('.json') ? require(process.argv[2]) : { collection: process.argv[2], output: process.argv[3], template: process.argv[4] })
+    ? (process.argv[2].endsWith('.json') ? require(process.argv[2]) : { collection: process.argv[2], output: process.argv[3], template: process.argv[4] })
     : require('./config.json')
   if (!config.template) config.template = 'template.html'
   if (!config.output) config.output = 'output'
 
   if (!config.template.endsWith('.html')) throw new Error(`Invalid template ${JSON.stringify(process.argv[3])}`)
-  if (!config.collection || !config.collection.startsWith('http://') || !config.collection.endsWith('.json')) throw new Error(`invalid collection URL ${JSON.stringify(config.collection)}`)
+
+  let library: ILibrary
+  if (!config.collection) throw new Error('No collection')
+  if (config.collection.startsWith('http://')) {
+    if (!config.collection.endsWith('.json')) throw new Error(`invalid collection URL ${JSON.stringify(config.collection)}`)
+    library = await request({ uri: config.collection, json: true })
+  } else {
+    if (!fs.existsSync(config.collection)) throw new Error(`${JSON.stringify(config.collection)} does not exist`)
+    library = JSON.parse(fs.readFileSync(config.collection, 'utf8'))
+  }
+
+  config.maxlength = config.maxlength || 20
+
+  function filename(name) {
+    return slug(name || '', ' ').substr(0, config.maxlength)
+  }
 
   console.log(pkg.version, config)
 
   const template = fs.readFileSync(config.template, 'utf-8')
-  const library: ILibrary = await request({ uri: config.collection, json: true })
 
   function write(item, _path) {
     _path = path.join(config.output, _path)
     mkdirp.sync(_path)
-    fs.writeFileSync(path.join(_path, slug(item.title || '' , ' ') + '.html'), item.html)
+    fs.writeFileSync(path.join(_path, filename(item.title) + '.html'), item.html)
     item.written = true
   }
 
   function resolveCollection(coll: ICollection, _path) {
-    coll.path = path.join(_path, slug(coll.name, ' '))
+    coll.path = path.join(_path, filename(coll.name))
 
     if (coll.items) {
       for (const item of library.items.filter(i => coll.items.includes(i.itemID))) {

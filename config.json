@@ -1,3 +1,4 @@
 {
-  "collection": "http://127.0.0.1:23119/better-bibtex/library?/1/library.json"
+  "collection": "http://127.0.0.1:23119/better-bibtex/library?/1/library.json",
+  "maxlength": 20
 }

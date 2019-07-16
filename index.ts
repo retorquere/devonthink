@@ -103,7 +103,6 @@ main(async () => {
   for (const coll of Object.values(library.collections).filter(c => !c.parent)) {
     resolveCollection(coll, '')
   }
-  console.log(library.collections)
 
   for (const item of library.items.filter(i => !i.written)) {
     write(item, '')

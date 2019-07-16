@@ -29,11 +29,10 @@
           "private-instance-method"
         ]
       }],
-      "no-magic-numbers": [true, -1, 0, 1, 2],
+      "no-magic-numbers": false,
       "prefer-for-of": true,
       "no-duplicate-variable": true,
       "no-string-throw": true,
-      "no-use-before-declare": true,
       "no-var-keyword": true,
       "prefer-object-spread": true,
       "triple-equals": [true, "allow-undefined-check", "allow-null-check"],

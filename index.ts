@@ -2,6 +2,7 @@ import request = require('request-promise')
 import * as fs from 'fs'
 import * as path from 'path'
 import slug = require('slug')
+import mkdirp = require('mkdirp')
 
 import * as nunjucks from 'nunjucks'
 nunjucks.configure({ autoescape: true })
@@ -19,19 +20,31 @@ function main(asyncMain) {
 }
 
 const collapse = new class {
-  creators(creators) {
-    return creators.map(author => author.literal || [ author.given, author.family ].filter(name => name).join(' ')).join(', ')
-  }
-  author(author) {
-    return this.creators(author)
+  public creators(creators) {
+    return creators.map(creator => creator.name || [ creator.firstName, creator.lastName ].filter(name => name).join(' ')).join(', ')
   }
 
-  date(date) {
-    return date['date-parts'][0].map(dp => `${dp}`).join('-')
+  public tags(tags) {
+    return tags.map(tag => tag.tag).sort().join(', ')
   }
-  issued(issued) {
-    return this.date(issued)
+
+  public notes(notes) {
+    return notes.map(note => `<div>${note}</div>`).join('\n\n')
   }
+}
+
+interface ICollection {
+  id: number
+  key: string
+  parent: false | string
+  name: string
+  items: number[],
+  collections: string[]
+  path: string
+}
+interface ILibrary {
+  collections: { [key: string]: ICollection }
+  items: any[]
 }
 
 main(async () => {
@@ -41,29 +54,58 @@ main(async () => {
   if (!config.template) config.template = 'template.html'
   if (!config.output) config.output = 'output'
 
+  if (!config.template.endsWith('.html')) throw new Error(`Invalid template ${JSON.stringify(process.argv[3])}`)
+  if (!config.collection || !config.collection.startsWith('http://') || !config.collection.endsWith('.json')) throw new Error(`invalid collection URL ${JSON.stringify(config.collection)}`)
+
   console.log(pkg.version, config)
 
-  if (!config.template.endsWith('.html')) throw new Error(`Invalid template ${JSON.stringify(process.argv[3])}`)
-  if (!config.collection || !config.collection.startsWith('http://') || !config.collection.match(/\.(csljson|bc03b4fe-436d-4a1f-ba59-de4d2d7a63f7)$/)) throw new Error(`invalid collection URL ${JSON.stringify(config.collection)}`)
-  
   const template = fs.readFileSync(config.template, 'utf-8')
-  const items = await request({ uri: config.collection, json: true })
+  const library: ILibrary = await request({ uri: config.collection, json: true })
 
-  for (const item of items) {
-    for (const [k, v] of Object.entries(item)) {
-      if (!k.match(/^[a-z]+$/i)) {
-        const _k = k.replace(/-(.)/g, (match, c) => c.toUpperCase())
-        item[_k] = v
-        delete item[k]
+  function write(item, _path) {
+    _path = path.join(config.output, _path)
+    mkdirp.sync(_path)
+    fs.writeFileSync(path.join(_path, slug(item.title || '' , ' ') + '.html'), item.html)
+    item.written = true
+  }
+
+  function resolveCollection(coll: ICollection, _path) {
+    coll.path = path.join(_path, slug(coll.name, ' '))
+
+    if (coll.items) {
+      for (const item of library.items.filter(i => coll.items.includes(i.itemID))) {
+        write(item, coll.path)
       }
     }
 
+    for (const child of coll.collections || []) {
+      resolveCollection(library.collections[child], coll.path)
+    }
+  }
+
+  for (const item of library.items) {
+    delete item.relations
+
     for (const [k, v] of Object.entries(item)) {
+      if (Array.isArray(v) && !v.length) {
+        delete item[k]
+        continue
+      }
+
       if (collapse[k]) item[k] = collapse[k](v)
 
-      if (typeof item[k] !== 'string') console.log(k, v)
+      if (typeof item[k] !== 'string' && typeof item[k] !== 'number') console.log(k, v)
     }
 
-    fs.writeFileSync(path.join(config.output, slug(item.title || '' , ' ') + '.html'), nunjucks.renderString(template, item))
+    item.html = nunjucks.renderString(template, item)
+  }
+
+  for (const coll of Object.values(library.collections).filter(c => !c.parent)) {
+    resolveCollection(coll, '')
+  }
+  console.log(library.collections)
+
+  for (const item of library.items.filter(i => !i.written)) {
+    write(item, '')
   }
 })

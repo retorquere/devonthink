@@ -11,11 +11,16 @@
           <td>{{creators}}</td>
         </tr>
         <tr>
-          <td><a href="{{url}}">{{title}}</a></td>
+          <td>{{title}}</a></td>
         </tr>
         <tr>
           <td>{{journal}}</td>
         </tr>
+        {% if DOI %}
+          <tr><td><a href="https://doi.org/{{DOI}}">{{DOI}}</a></td></tr>
+        {% elif url %}
+          <tr><td><a href="{{url}}">{{url}}</a></td></tr>
+        {% endif %}
         <tr>
           <td>{{notes | safe}}</td>
         </tr>

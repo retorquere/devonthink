@@ -3,6 +3,8 @@ import * as fs from 'fs'
 import * as path from 'path'
 import slug = require('slug')
 import mkdirp = require('mkdirp')
+import alert = require('alert-node')
+import program = require('commander')
 
 import * as nunjucks from 'nunjucks'
 nunjucks.configure({ autoescape: true })
@@ -14,7 +16,8 @@ function main(asyncMain) {
       process.exit(exitCode || 0)
     })
     .catch(err => {
-      console.log('main failed:', err.stack)
+      console.log(err.message)
+      alert(err.message)
       process.exit(1)
     })
 }
@@ -52,36 +55,47 @@ interface ILibrary {
 }
 
 main(async () => {
-  const config = process.argv[2]
-    ? (process.argv[2].endsWith('.json') ? require(process.argv[2]) : { collection: process.argv[2], output: process.argv[3], template: process.argv[4] })
-    : require('./config.json')
-  if (!config.template) config.template = 'template.html'
-  if (!config.output) config.output = 'output'
+  // config
+  let defaults: any = process.argv.length > 2 && process.argv[process.argv.length - 1]
+  defaults = fs.existsSync(defaults) ? defaults : 'config.json'
+  defaults = fs.existsSync(defaults) ? JSON.parse(fs.readFileSync(defaults, 'utf8')) : {}
 
-  if (!config.template.endsWith('.html')) throw new Error(`Invalid template ${JSON.stringify(process.argv[3])}`)
+  program
+    .version(pkg.version, '-v, --version')
+    .option('-t, --template [file]', 'template to use', defaults.template || 'template.html')
+    .option('-o, --output [dir]', 'output folder', defaults.output || 'output')
+    .option('-c, --collection <url>', 'Zotero library/collection URL', defaults.collection)
+    .option('-m, --maxlength [n]', 'Cut off file paths at n characters', defaults.maxlength || 20)
+    .parse(process.argv)
 
+  if (!fs.existsSync(program.template)) throw new Error(`${JSON.stringify(program.template)} does not exist`)
+  const template = fs.readFileSync(program.template, 'utf-8')
+
+  if (!program.collection) throw new Error('no collection URL')
   let library: ILibrary
-  if (!config.collection) throw new Error('No collection')
-  if (config.collection.startsWith('http://')) {
-    if (!config.collection.endsWith('.json')) throw new Error(`invalid collection URL ${JSON.stringify(config.collection)}`)
-    library = await request({ uri: config.collection, json: true })
+  if (program.collection.startsWith('http')) {
+    if (!program.collection.endsWith('.json')) throw new Error(`invalid collection URL ${JSON.stringify(program.collection)}`)
+    library = await request({ uri: program.collection, json: true })
   } else {
-    if (!fs.existsSync(config.collection)) throw new Error(`${JSON.stringify(config.collection)} does not exist`)
-    library = JSON.parse(fs.readFileSync(config.collection, 'utf8'))
+    if (!fs.existsSync(program.collection)) throw new Error(`${JSON.stringify(program.collection)} does not exist`)
+    library = JSON.parse(fs.readFileSync(program.collection, 'utf8'))
   }
 
-  config.maxlength = config.maxlength || 20
-
-  function filename(name) {
-    return slug(name || '', ' ').substr(0, config.maxlength)
+  const config = {}
+  for (let option of program.options) {
+    option = option.long.replace('--', '')
+    if (option === 'version') continue
+    config[option] = program[option]
   }
-
   console.log(pkg.version, config)
 
-  const template = fs.readFileSync(config.template, 'utf-8')
+  // helper functions
+  function filename(name) {
+    return slug(name || '', ' ').substr(0, program.maxlength)
+  }
 
   function write(item, _path) {
-    _path = path.join(config.output, _path)
+    _path = path.join(program.output, _path)
     mkdirp.sync(_path)
     fs.writeFileSync(path.join(_path, filename(item.title) + '.html'), item.html)
     item.written = true
@@ -101,8 +115,11 @@ main(async () => {
     }
   }
 
+  // main
+  const DOIprefix = 'https://doi.org/'
   for (const item of library.items) {
     delete item.relations
+    if (item.DOI && item.DOI.startsWith(DOIprefix)) item.DOI = item.DOI.substr(DOIprefix.length)
 
     for (const [k, v] of Object.entries(item)) {
       if (Array.isArray(v) && !v.length) {

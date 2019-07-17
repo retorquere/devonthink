@@ -58,13 +58,13 @@ interface ILibrary {
 
 main(async () => {
   // config
-  let defaults: any = process.argv.length > 2 && process.argv[process.argv.length - 1]
-  defaults = fs.existsSync(defaults) ? defaults : 'config.json'
-  defaults = fs.existsSync(defaults) ? JSON.parse(fs.readFileSync(defaults, 'utf8')) : {}
+  let defaults: any = [ (process.argv.length > 2 && process.argv[process.argv.length - 1]), 'config.json', 'config.json.sample' ].find(cfg => cfg && fs.existsSync(cfg))
+  defaults = defaults ? JSON.parse(fs.readFileSync(defaults, 'utf8')) : {}
+  defaults.template = defaults.template || [ 'template.html', 'template.html.sample' ].find(tmpl => fs.existsSync(tmpl))
 
   program
     .version(pkg.version, '-v, --version')
-    .option('-t, --template [file]', 'template to use', defaults.template || 'template.html')
+    .option('-t, --template [file]', 'template to use', defaults.template)
     .option('-o, --output [dir]', 'output folder', defaults.output || 'output')
     .option('-c, --collection <url>', 'Zotero library/collection URL', defaults.collection)
     .option('-m, --maxlength [n]', 'Cut off file paths at n characters', defaults.maxlength || 20)

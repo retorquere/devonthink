@@ -18,4 +18,4 @@ You can see what data is available to the template by plugging the URL from step
 8. `tags` will be changed into a single field listing all tags, sorted alphabetically
 9. `notes` will be changed into a single field with all notes
 
-Nunjucks will escape everything so that it is valid HTML; there is one special field called `note` which is already valid HTML, so if you want this in the template, add it as `{{ note | safe }}` so nunjucks doesn't escape it again
+Nunjucks will escape everything so that it is valid HTML; there is one special field called `notes` which is already valid HTML, so if you want this in the template, add it as `{{ notes | safe }}` so nunjucks doesn't escape it again

@@ -1,6 +1,6 @@
 {
   "name": "zotero-devonthink",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "description": "Copies the contents of a Zotero collection to HTML files for import into DevonThink",
   "scripts": {
     "prestart": "npm install",

@@ -77,7 +77,7 @@ main(async () => {
   let library: ILibrary
   if (program.collection.startsWith('http')) {
     if (!program.collection.endsWith('.json')) throw new Error(`invalid collection URL ${JSON.stringify(program.collection)}`)
-    library = await request({ uri: program.collection, json: true })
+    library = await request({ uri: program.collection, json: true, headers: { 'User-Agent': 'DevonThink' } })
   } else {
     if (!fs.existsSync(program.collection)) throw new Error(`${JSON.stringify(program.collection)} does not exist`)
     library = JSON.parse(fs.readFileSync(program.collection, 'utf8'))

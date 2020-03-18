@@ -11,7 +11,7 @@
   "author": "Emiliano Heyns",
   "license": "ISC",
   "dependencies": {
-    "@types/node": "^12.6.2",
+    "@types/node": "^12.12.30",
     "alert-node": "^1.2.5",
     "commander": "^2.20.0",
     "mkdirp": "^0.5.1",
